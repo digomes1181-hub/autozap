@@ -21,6 +21,7 @@
   "author": "Antigravity AI",
   "license": "MIT",
   "dependencies": {
+    "@netlify/blobs": "^11.1.1",
     "@whiskeysockets/baileys": "^6.7.18",
     "axios": "^1.7.9",
     "cors": "^2.8.5",
