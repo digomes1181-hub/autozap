@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WhatsApp API | Painel de Agentes de I.A.</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header -->
+    <header class="navbar">
+      <div class="brand">
+        <div class="brand-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+          </svg>
+        </div>
+        <div>
+          <h1>WhatsApp AI Agent API</h1>
+          <p class="subtitle">Plataforma de Comunicação para Inteligência Artificial</p>
+        </div>
+      </div>
+      <div class="nav-actions">
+        <a href="/docs" target="_blank" class="btn btn-outline">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+          Swagger Docs
+        </a>
+        <a href="/openapi.json" target="_blank" class="btn btn-outline">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+          OpenAPI JSON
+        </a>
+      </div>
+    </header>
+
+    <!-- Main Grid -->
+    <main class="dashboard-grid">
+      <!-- Left Column: Connection & Stats -->
+      <section class="card connection-card">
+        <div class="card-header">
+          <h2>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z"/><circle cx="12" cy="12" r="3"/></svg>
+            Status da Conexão
+          </h2>
+          <div id="statusBadge" class="badge badge-disconnected">
+            <span class="badge-dot"></span>
+            <span id="statusText">Desconectado</span>
+          </div>
+        </div>
+
+        <div class="card-body">
+          <!-- QR Code Display Area -->
+          <div id="qrContainer" class="qr-container">
+            <div id="qrPlaceholder" class="qr-placeholder">
+              <div class="spinner"></div>
+              <p>Aguardando inicialização do QR Code...</p>
+            </div>
+            <img id="qrImage" class="qr-image hidden" alt="QR Code WhatsApp" />
+            <div id="connectedUser" class="connected-user hidden">
+              <div class="avatar">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+              </div>
+              <div class="user-info">
+                <h3 id="userName">WhatsApp Conectado</h3>
+                <p id="userId" class="font-mono">5511999999999</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="action-buttons">
+            <button id="btnConnect" class="btn btn-primary btn-block">Conectar (QR Code)</button>
+            <button id="btnPairingCode" class="btn btn-outline btn-block">Parear via Código</button>
+            <button id="btnDisconnect" class="btn btn-danger btn-block hidden">Desconectar</button>
+          </div>
+
+          <!-- Pairing Code Modal / Inline Form -->
+          <div id="pairingContainer" class="pairing-container hidden">
+            <div class="form-group margin-top-sm">
+              <label for="pairingPhone">Número com DDD (ex: 5511999999999)</label>
+              <div class="input-with-button">
+                <input type="text" id="pairingPhone" placeholder="5511999999999">
+                <button id="btnSubmitPairing" class="btn btn-success btn-sm">Gerar</button>
+              </div>
+            </div>
+            <div id="pairingCodeDisplay" class="pairing-code-display hidden font-mono">
+              <span class="pairing-label">Seu Código de Pareamento:</span>
+              <span id="pairingCodeVal" class="pairing-val">---- ----</span>
+            </div>
+          </div>
+
+          <!-- Stats Mini Cards -->
+          <div class="stats-grid">
+            <div class="stat-box">
+              <span class="stat-label">Mensagens Recebidas</span>
+              <span id="statReceived" class="stat-value">0</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-label">Mensagens Enviadas</span>
+              <span id="statSent" class="stat-value">0</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-label">Webhooks Disparados</span>
+              <span id="statWebhooks" class="stat-value">0</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Center Column: Test Message & Live Console / Live Chat -->
+      <section class="card console-card">
+        <div class="card-header">
+          <h2>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+            Console & Atendimento em Tempo Real
+          </h2>
+          <div class="console-tabs">
+            <button id="tabBtnLog" class="tab-pill active">Feed Ao Vivo</button>
+            <button id="tabBtnChats" class="tab-pill">Chats & Intervenção</button>
+          </div>
+        </div>
+
+        <div class="card-body flex-col">
+          <!-- View 1: Feed Ao Vivo & Envio Rápido -->
+          <div id="viewLiveFeed" class="console-view active flex-col">
+            <!-- Send Test Message Form -->
+            <form id="sendMessageForm" class="send-form">
+              <div class="form-row">
+                <div class="form-group flex-1">
+                  <label for="sendPhone">Número Destino</label>
+                  <input type="text" id="sendPhone" placeholder="5511999999999" required>
+                </div>
+                <div class="form-group flex-2">
+                  <label for="sendMessageText">Mensagem</label>
+                  <input type="text" id="sendMessageText" placeholder="Digite a mensagem para enviar..." required>
+                </div>
+                <button type="submit" class="btn btn-success align-self-end">
+                  Enviar
+                </button>
+              </div>
+            </form>
+
+            <!-- Live Messages Log -->
+            <div class="log-header">
+              <h3>Feed de Mensagens (Socket.IO)</h3>
+              <span class="live-indicator"><span class="pulse"></span> AO VIVO</span>
+            </div>
+            <div id="messagesLog" class="messages-log font-mono">
+              <div class="log-entry log-system">Sistema iniciado. Aguardando mensagens do WhatsApp...</div>
+            </div>
+          </div>
+
+          <!-- View 2: Interactive Live Chat & Human Takeover -->
+          <div id="viewLiveChats" class="console-view flex-row hidden">
+            <div class="chat-sidebar">
+              <div class="chat-sidebar-header">
+                <h3>Conversas Ativas</h3>
+                <button id="btnRefreshChats" class="btn-icon" title="Atualizar Chats">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+                </button>
+              </div>
+              <div id="chatList" class="chat-list">
+                <div class="chat-empty">Nenhum chat ativo ainda.</div>
+              </div>
+            </div>
+            <div class="chat-main">
+              <div id="chatHeader" class="chat-header hidden">
+                <div class="chat-header-info">
+                  <h4 id="chatActiveName">Selecione uma conversa</h4>
+                  <span id="chatActiveJid" class="font-mono text-muted"></span>
+                </div>
+                <div class="chat-header-actions">
+                  <label class="switch switch-sm" title="Pausar auto-resposta de IA para este chat">
+                    <input type="checkbox" id="chkTakeoverAi">
+                    <span class="slider round"></span>
+                  </label>
+                  <span id="takeoverLabel" class="takeover-status font-mono">IA Ativa</span>
+                </div>
+              </div>
+              <div id="chatThread" class="chat-thread">
+                <div class="chat-empty-thread">Selecione uma conversa no painel à esquerda para ver a troca de mensagens e alternar para modo Humano.</div>
+              </div>
+              <form id="chatReplyForm" class="chat-reply-form hidden">
+                <input type="text" id="chatReplyText" placeholder="Digite uma resposta como atendente humano..." required>
+                <button type="submit" class="btn btn-primary">Enviar</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right Column: AI Agent & Webhook Configuration -->
+      <section class="card config-card">
+        <div class="card-header">
+          <h2>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2 2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zM4 12a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2 2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm12 0a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-2a2 2 0 0 1-2-2zm-6 6a2 2 0 0 1 2-2v2a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-2a2 2 0 0 1 2-2z"></path></svg>
+            Configuração do Agente de I.A.
+          </h2>
+        </div>
+
+        <div class="card-body">
+          <form id="configForm">
+            <!-- Webhook URL & Test -->
+            <div class="form-group">
+              <label for="cfgWebhookUrl">Webhook URL (n8n / Flowise / Custom API)</label>
+              <div class="input-with-button">
+                <input type="url" id="cfgWebhookUrl" placeholder="https://seu-servidor-ia.com/webhook">
+                <button type="button" id="btnTestWebhook" class="btn btn-outline btn-sm">Testar</button>
+              </div>
+              <div id="webhookTestResult" class="test-result-box hidden font-mono"></div>
+              <small class="help-text">Toda mensagem recebida será postada automaticamente nesta URL via HTTP POST.</small>
+            </div>
+
+            <!-- Auto-Respond Toggle -->
+            <div class="form-group checkbox-group">
+              <label class="switch">
+                <input type="checkbox" id="cfgAiAutoRespond">
+                <span class="slider round"></span>
+              </label>
+              <span class="switch-label">Ativar Resposta Automática de I.A. (OpenAI)</span>
+            </div>
+
+            <!-- OpenAI API Key -->
+            <div class="form-group">
+              <label for="cfgOpenaiKey">OpenAI API Key (Opcional)</label>
+              <input type="password" id="cfgOpenaiKey" placeholder="sk-...">
+            </div>
+
+            <!-- System Prompt -->
+            <div class="form-group">
+              <label for="cfgSystemPrompt">Prompt de Sistema da I.A.</label>
+              <textarea id="cfgSystemPrompt" rows="3" placeholder="Defina a personalidade do seu agente de WhatsApp..."></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block">Salvar Configurações</button>
+          </form>
+
+          <!-- API Key display helper -->
+          <div class="api-key-box">
+            <span>Sua Chave de API:</span>
+            <code id="apiKeyDisplay" class="font-mono">sk_whatsapp_agent_secret_key_123</code>
+          </div>
+        </div>
+      </section>
+
+      <!-- Bottom Full Width Column: Developers Code Snippet Generator -->
+      <section class="card snippets-card full-width">
+        <div class="card-header">
+          <h2>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+            Integração Rápida para Desenvolvedores de Agentes de I.A.
+          </h2>
+        </div>
+        <div class="card-body">
+          <div class="tabs">
+            <button class="tab-btn active" data-tab="tab-python">Python (Requests)</button>
+            <button class="tab-btn" data-tab="tab-js">Node.js (Axios)</button>
+            <button class="tab-btn" data-tab="tab-curl">cURL</button>
+            <button class="tab-btn" data-tab="tab-n8n">Payload Webhook Recebido</button>
+          </div>
+
+          <div class="tab-contents">
+            <div id="tab-python" class="tab-content active">
+              <pre><code class="font-mono">import requests
+
+url = "http://localhost:3000/api/messages/send"
+headers = {
+    "x-api-key": "sk_whatsapp_agent_secret_key_123",
+    "Content-Type": "application/json"
+}
+payload = {
+    "number": "5511999999999",
+    "message": "Olá! Resposta gerada pelo meu Agente de Inteligência Artificial."
+}
+
+response = requests.post(url, json=payload, headers=headers)
+print(response.json())</code></pre>
+            </div>
+
+            <div id="tab-js" class="tab-content">
+              <pre><code class="font-mono">import axios from 'axios';
+
+const response = await axios.post('http://localhost:3000/api/messages/send', {
+  number: '5511999999999',
+  message: 'Olá! Resposta gerada pelo Agente de IA.'
+}, {
+  headers: {
+    'x-api-key': 'sk_whatsapp_agent_secret_key_123'
+  }
+});
+
+console.log(response.data);</code></pre>
+            </div>
+
+            <div id="tab-curl" class="tab-content">
+              <pre><code class="font-mono">curl -X POST http://localhost:3000/api/messages/send \
+  -H "x-api-key: sk_whatsapp_agent_secret_key_123" \
+  -H "Content-Type: application/json" \
+  -d '{"number": "5511999999999", "message": "Olá do cURL!"}'</code></pre>
+            </div>
+
+            <div id="tab-n8n" class="tab-content">
+              <pre><code class="font-mono">{
+  "event": "message.received",
+  "timestamp": "2026-09-24T20:50:00.000Z",
+  "data": {
+    "id": "3EB0...123",
+    "from": "5511999999999@s.whatsapp.net",
+    "phone": "5511999999999",
+    "senderName": "Maria Silva",
+    "message": "Qual é o valor do frete?",
+    "conversationHistory": [
+      { "fromMe": false, "text": "Olá" },
+      { "fromMe": true, "text": "Como posso te ajudar?" }
+    ]
+  }
+}</code></pre>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <p>WhatsApp AI Agent API &bull; Desenvolvido para Conectar Modelos de Linguagem e Agentes de I.A.</p>
+    </footer>
+  </div>
+
+  <!-- Socket.IO client library -->
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

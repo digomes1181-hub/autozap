@@ -1,0 +1,35 @@
+{
+  "name": "whatsapp-ai-agent-api",
+  "version": "1.0.0",
+  "description": "API RESTful e Webhook de WhatsApp de alta performance para integração com Agentes de Inteligência Artificial.",
+  "main": "src/server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js"
+  },
+  "keywords": [
+    "whatsapp",
+    "ai-agent",
+    "baileys",
+    "api",
+    "webhook",
+    "llm",
+    "openai",
+    "express"
+  ],
+  "author": "Antigravity AI",
+  "license": "MIT",
+  "dependencies": {
+    "@whiskeysockets/baileys": "^6.7.18",
+    "axios": "^1.7.9",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "multer": "^1.4.5-lts.1",
+    "pino": "^9.6.0",
+    "qrcode": "^1.5.4",
+    "socket.io": "^4.8.1",
+    "swagger-ui-express": "^5.0.1"
+  }
+}
