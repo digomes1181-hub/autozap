@@ -1,8 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
-  // Connect Socket.IO
-  const socket = io();
-
   // Elements
+  const deploymentBanner = document.getElementById('deploymentBanner');
+  const apiKeyDisplay = document.getElementById('apiKeyDisplay');
   const statusBadge = document.getElementById('statusBadge');
   const statusText = document.getElementById('statusText');
   const qrPlaceholder = document.getElementById('qrPlaceholder');
@@ -52,37 +51,30 @@ document.addEventListener('DOMContentLoaded', () => {
   const chatReplyForm = document.getElementById('chatReplyForm');
   const chatReplyText = document.getElementById('chatReplyText');
 
-  let currentApiKey = 'sk_whatsapp_agent_secret_key_123';
+  let currentApiKey = '';
   let selectedJid = null;
 
-  // Fetch initial config
-  fetchConfig();
-  fetchChats();
+  // Fetch initial status (this deployment has no live Socket.IO feed), then config/chats
+  bootstrap();
 
-  // Socket Event Handlers
-  socket.on('status_change', (data) => {
-    updateStatusUI(data.status, data.user);
-    if (data.stats) {
-      updateStatsUI(data.stats);
+  async function bootstrap() {
+    try {
+      const res = await fetch('/api/status');
+      const data = await res.json();
+      currentApiKey = data.apiKey || '';
+      if (apiKeyDisplay) apiKeyDisplay.textContent = currentApiKey || '(não configurada)';
+      updateStatusUI(data.status);
+      if (data.stats) updateStatsUI(data.stats);
+      if (deploymentBanner && data.message) {
+        deploymentBanner.textContent = data.message;
+        deploymentBanner.classList.remove('hidden');
+      }
+    } catch (err) {
+      appendSystemLog(`Erro ao carregar status: ${err.message}`);
     }
-  });
-
-  socket.on('qr_update', (data) => {
-    if (data.qr) {
-      qrImage.src = data.qr;
-      qrImage.classList.remove('hidden');
-      qrPlaceholder.classList.add('hidden');
-      connectedUser.classList.add('hidden');
-    }
-  });
-
-  socket.on('new_message', (msg) => {
-    appendLogMessage(msg);
+    fetchConfig();
     fetchChats();
-    if (selectedJid && (msg.jid === selectedJid || msg.jid.startsWith(selectedJid.split('@')[0]))) {
-      appendThreadMessage(msg);
-    }
-  });
+  }
 
   // Connection Actions
   btnConnect.addEventListener('click', async () => {

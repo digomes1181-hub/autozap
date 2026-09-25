@@ -1,0 +1,104 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "WhatsApp API para Agentes de I.A.",
+    "version": "1.0.0",
+    "description": "API RESTful para envio, recebimento de mensagens e integração de Agentes de Inteligência Artificial com o WhatsApp.\n\nNota sobre esta implantação: hospedada em funções serverless do Netlify, que não suportam a conexão WebSocket persistente exigida pelo motor de WhatsApp (Baileys). Endpoints de conexão e envio de mensagens (`/api/connect`, `/api/connect-pairing`, `/api/messages/send`, `/api/messages/send-media`) retornam HTTP 501 nesta implantação. `/api/config` e `/api/webhook/test` funcionam normalmente."
+  },
+  "components": {
+    "securitySchemes": {
+      "ApiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "x-api-key",
+        "description": "Chave de segurança da API"
+      }
+    },
+    "schemas": {
+      "SendMessageRequest": {
+        "type": "object",
+        "required": ["number", "message"],
+        "properties": {
+          "number": { "type": "string", "example": "5511999999999" },
+          "message": { "type": "string", "example": "Olá! Sou um assistente de IA." }
+        }
+      },
+      "ConfigUpdate": {
+        "type": "object",
+        "properties": {
+          "webhookUrl": { "type": "string", "example": "https://seu-servidor-ia.com/api/webhook" },
+          "aiAutoRespond": { "type": "boolean", "example": true },
+          "aiSystemPrompt": { "type": "string", "example": "Você é um assistente prestativo da empresa." }
+        }
+      }
+    }
+  },
+  "security": [{ "ApiKeyAuth": [] }],
+  "paths": {
+    "/api/status": {
+      "get": {
+        "summary": "Verifica status da conexão e estatísticas",
+        "security": [],
+        "responses": { "200": { "description": "Status retornado com sucesso (sempre UNAVAILABLE nesta implantação)" } }
+      }
+    },
+    "/api/connect": {
+      "post": {
+        "summary": "Inicia a conexão com o WhatsApp via QR Code",
+        "security": [],
+        "responses": { "501": { "description": "Indisponível em funções serverless" } }
+      }
+    },
+    "/api/connect-pairing": {
+      "post": {
+        "summary": "Gera um código para parear o WhatsApp por número de telefone",
+        "security": [],
+        "responses": { "501": { "description": "Indisponível em funções serverless" } }
+      }
+    },
+    "/api/messages/send": {
+      "post": {
+        "summary": "Envia uma mensagem de texto no WhatsApp",
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/SendMessageRequest" } } }
+        },
+        "responses": {
+          "501": { "description": "Indisponível em funções serverless" },
+          "401": { "description": "Chave de API não autorizada" }
+        }
+      }
+    },
+    "/api/chats": {
+      "get": {
+        "summary": "Lista as conversas ativas no WhatsApp",
+        "responses": { "200": { "description": "Lista de chats (sempre vazia nesta implantação)" } }
+      }
+    },
+    "/api/webhook/test": {
+      "post": {
+        "summary": "Dispara um evento de teste via HTTP POST para a URL de Webhook informada",
+        "requestBody": {
+          "content": {
+            "application/json": { "schema": { "type": "object", "properties": { "url": { "type": "string" } } } }
+          }
+        },
+        "responses": { "200": { "description": "Resultado do teste de Webhook" } }
+      }
+    },
+    "/api/config": {
+      "get": {
+        "summary": "Retorna as configurações atuais de Webhook e IA",
+        "responses": { "200": { "description": "Configurações atuais" } }
+      },
+      "post": {
+        "summary": "Atualiza o Webhook URL e parâmetros do Agente de IA",
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ConfigUpdate" } } }
+        },
+        "responses": { "200": { "description": "Configurações atualizadas" } }
+      }
+    }
+  }
+}
